@@ -1,0 +1,36 @@
+name: Check Prohibited Words in PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  check-prohibited-words:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # if you have dependencies
+
+      - name: Check for prohibited words
+        run: |
+          python check_prohibited_words.py
+
+      - name: Fail if prohibited words are found
+        if: failure()
+        run: |
+          echo "Prohibited words found in the pull request. Please remove them."
+          exit 1
